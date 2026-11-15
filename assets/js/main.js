@@ -68,9 +68,11 @@
   }
 
   /* ---------- Map ---------- */
-  const q = encodeURIComponent(CFG.mapQuery);
-  $("#mapFrame").src = `https://maps.google.com/maps?q=${q}&z=14&output=embed`;
-  $("#mapLink").href = `https://www.google.com/maps/search/?api=1&query=${q}`;
+  const q = `${CFG.mapLat},${CFG.mapLng}`;
+  const mapUrl = `https://www.google.com/maps/search/?api=1&query=${q}`;
+  const mapFrame = $("#mapFrame");
+  if (mapFrame) mapFrame.src = `https://maps.google.com/maps?q=${q}&z=17&output=embed`;
+  $("#mapLink").href = mapUrl;
 
   /* ---------- Models ---------- */
   const modelTabs = $("#modelTabs"), modelPanel = $("#modelPanel");
@@ -235,7 +237,7 @@
       "طلب اهتمام - مشروع مساكن الأخيار",
       `الاسم: ${d.name}`, `الجوال: ${d.phone}`,
       d.model && `النموذج: ${d.model}`, d.unit && `رقم الشقة: ${d.unit}`,
-      d.payment && `طريقة الشراء: ${d.payment}`, d.message && `ملاحظات: ${d.message}`,
+      d.message && `ملاحظات: ${d.message}`,
     ].filter(Boolean).join("\n");
 
     if (CFG.phoneIntl) {
@@ -252,6 +254,26 @@
     status.textContent = "شكرًا لك! تم استلام طلبك وسيتواصل معك فريق المبيعات قريبًا.";
     form.reset();
   });
+
+  /* ---------- Hero lead: two full lines under the title ---------- */
+  const lead = $(".hero-lead");
+  const fitLead = () => {
+    if (!lead) return;
+    let lo = 11, hi = 28;
+    for (let i = 0; i < 14; i++) {
+      const mid = (lo + hi) / 2;
+      lead.style.fontSize = mid + "px";
+      const lh = parseFloat(getComputedStyle(lead).lineHeight);
+      if (lead.scrollHeight <= lh * 2 + 1) lo = mid; else hi = mid;
+    }
+    lead.style.fontSize = (Math.floor(lo * 10) / 10 - 0.2) + "px"; // round down with a small safety margin
+  };
+  fitLead();
+  // Re-fit whenever the title's width changes (web font load, resize)
+  const heroTitle = $(".hero-headline h1");
+  if (heroTitle && "ResizeObserver" in window) new ResizeObserver(() => requestAnimationFrame(fitLead)).observe(heroTitle);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLead);
+  window.addEventListener("load", fitLead);
 
   $("#year").textContent = new Date().getFullYear();
 })();
