@@ -7,8 +7,8 @@
   --sand: #a5865a;       /* ذهبي الغنام */
   --sand-dark: #7f6440;
   --gold-light: #d1b27c; /* ذهبي على الخلفيات الداكنة */
-  --clay: #f39925;       /* برتقالي مساكن الأخيار */
-  --clay-dark: #d47f12;
+  --clay: #f9cc92;       /* برتقالي مساكن الأخيار بكثافة 50% */
+  --clay-dark: #f9cc92;
   --cream: #f8eee4;
   --paper: #fcf8f3;
   --line: #eadfce;
@@ -91,7 +91,8 @@ button { font-family: inherit; cursor: pointer; }
 .eyebrow { display: inline-block; padding: .2em 1em; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; font-size: 14px; letter-spacing: .02em; margin-bottom: 18px; backdrop-filter: blur(4px); }
 .hero h1 { color: #fff; font-size: clamp(2.6rem, 7vw, 4.6rem); font-weight: 700; margin-bottom: .2em; }
 .hero h1 + .hero-sub { display: block; color: var(--gold-light); font-size: var(--fs-sub); line-height: 1.3; margin: -.1em 0 .6em; }
-.hero-lead { font-size: 17px; opacity: .92; max-width: 600px; }
+.hero-headline { width: fit-content; max-width: 100%; }
+.hero-lead { font-size: 12.75px; line-height: 2; opacity: .92; width: 0; min-width: 100%; text-align: justify; margin: 0; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 .scroll-cue { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); width: 28px; height: 46px; border: 2px solid rgba(255,255,255,.7); border-radius: 20px; }
 .scroll-cue span { position: absolute; top: 8px; left: 50%; width: 4px; height: 8px; margin-left: -2px; background: #fff; border-radius: 2px; animation: cue 1.8s infinite; }
@@ -100,15 +101,16 @@ button { font-family: inherit; cursor: pointer; }
 /* ---------- Stats ---------- */
 .stats-bar { background: var(--ink); color: #fff; position: relative; z-index: 2; }
 .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); }
-.stat { padding: 30px 12px; text-align: center; border-inline-start: 1px solid rgba(255,255,255,.08); }
+.stat { padding: 10px 12px; line-height: 1.5; text-align: center; border-inline-start: 1px solid rgba(255,255,255,.08); }
 .stat:first-child { border: 0; }
-.stat-num { display: block; font-size: var(--fs-title); font-weight: 700; color: var(--gold-light); line-height: 1.2; }
+.stat-num { display: block; font-size: var(--fs-title); font-weight: 700; color: var(--gold-light); line-height: 1.15; }
 .stat-num small { font-size: .5em; margin-inline-start: 4px; color: #fff; opacity: .8; }
-.stat-label { font-size: 15px; opacity: .85; }
+.stat-label { font-size: 15px; opacity: .85; display: block; line-height: 1.4; }
 
 /* ---------- Sections ---------- */
 .section { padding: clamp(70px, 10vw, 120px) 0; }
 .section-alt { background: var(--cream); }
+#about.section { padding-block: clamp(35px, 5vw, 60px); }
 .section-dark { background: var(--ink); color: #d6dbe1; }
 .section-dark h2, .section-dark .section-title { color: #fff; }
 .section-dark .section-sub { color: var(--gold-light); }
@@ -137,8 +139,8 @@ h2 { font-size: var(--fs-title); }
 .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .feature { background: #fff; border-radius: var(--radius); padding: 32px 28px; border: 1px solid var(--line); transition: transform .3s, box-shadow .3s; }
 .feature:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
-.feature-icon { width: 56px; height: 56px; border-radius: 16px; background: var(--cream); display: grid; place-items: center; margin-bottom: 18px; }
-.feature-icon svg { width: 28px; height: 28px; fill: none; stroke: var(--clay-dark); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.feature-icon { width: 56px; height: 56px; border-radius: 16px; background: var(--clay); display: grid; place-items: center; margin-bottom: 18px; }
+.feature-icon svg { width: 28px; height: 28px; fill: none; stroke: var(--ink-2); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .feature h3 { font-size: 20px; color: var(--ink-2); }
 .feature p { color: var(--muted); margin: 0; font-size: var(--fs-body); }
 
@@ -155,7 +157,7 @@ h2 { font-size: var(--fs-title); }
 .model-badge { display: inline-block; background: var(--ink); color: var(--gold-light); font-weight: 700; padding: .2em .9em; border-radius: 8px; margin-bottom: 12px; }
 .model-area { display: flex; gap: 28px; margin: 8px 0 24px; flex-wrap: wrap; }
 .model-area div { display: flex; flex-direction: column; }
-.model-area b { font-size: var(--fs-title); color: var(--clay-dark); line-height: 1.2; }
+.model-area b { font-size: var(--fs-title); color: var(--ink-2); line-height: 1.2; }
 .model-area span { color: var(--muted); font-size: .9rem; }
 .room-list { list-style: none; padding: 0; margin: 0 0 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .room-list li { display: flex; align-items: center; gap: 10px; background: #fff; padding: 10px 14px; border-radius: 12px; font-weight: 500; color: var(--ink); font-size: .95rem; }
@@ -227,7 +229,7 @@ h2 { font-size: var(--fs-title); }
 .contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 56px; align-items: start; }
 .contact-list { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 14px; }
 .contact-list li { display: flex; align-items: center; gap: 12px; color: var(--ink); font-weight: 500; }
-.contact-list svg { width: 40px; height: 40px; padding: 9px; border-radius: 12px; background: var(--cream); fill: none; stroke: var(--clay-dark); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.contact-list svg { width: 40px; height: 40px; padding: 9px; border-radius: 12px; background: var(--clay); fill: none; stroke: var(--ink-2); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 .contact-form { background: #fff; border: 1px solid var(--line); border-radius: 24px; padding: clamp(22px, 4vw, 40px); box-shadow: var(--shadow); }
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -326,7 +328,7 @@ body.no-scroll { overflow: hidden; }
   .hero-content { padding-bottom: 96px; }
   .features-grid { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .stat { border-top: 1px solid rgba(255,255,255,.08); padding: 22px 8px; }
+  .stat { border-top: 1px solid rgba(255,255,255,.08); padding: 10px 8px; }
   .stat:nth-child(odd) { border-inline-start: 0; }
   .stat:last-child { grid-column: 1 / -1; }
   .facts div { grid-template-columns: 1fr; gap: 2px; }
@@ -353,16 +355,14 @@ body.no-scroll { overflow: hidden; }
 /* ---------- المسوق الحصري (الغنام العقارية) ---------- */
 .marketer {
   position: absolute; z-index: 2; bottom: 104px; left: max(16px, (100% - 1200px) / 2);
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  width: 300px; padding: 22px 26px 16px; border-radius: 20px;
-  background: rgba(252, 248, 243, .94); backdrop-filter: blur(8px);
-  box-shadow: 0 24px 50px -24px rgba(0,0,0,.55); border: 1px solid rgba(165,134,90,.35);
+  display: flex; flex-direction: column; align-items: center; gap: 10px; width: 300px;
+  filter: drop-shadow(0 4px 14px rgba(0,0,0,.45));
 }
 .marketer img { width: 100%; height: auto; }
-.marketer-label { display: flex; align-items: center; gap: 10px; width: 100%; color: var(--sand-dark); font-weight: 600; font-size: 16px; line-height: 1.4; white-space: nowrap; }
-.marketer-label::before, .marketer-label::after { content: ""; flex: 1; height: 1px; background: var(--sand); opacity: .6; }
+.marketer-label { display: flex; align-items: center; gap: 10px; width: 100%; color: #fff; font-weight: 600; font-size: 16px; line-height: 1.4; white-space: nowrap; }
+.marketer-label::before, .marketer-label::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,.7); }
 @media (max-width: 960px) {
   .hero { flex-direction: column; justify-content: flex-end; align-items: stretch; }
   .hero-content { padding-bottom: 28px; }
-  .marketer { position: relative; bottom: auto; left: auto; width: min(280px, calc(100% - 32px)); margin: 0 16px 92px auto; margin-inline: 16px auto; padding: 16px 20px 12px; }
+  .marketer { position: relative; bottom: auto; left: auto; width: min(240px, calc(100% - 32px)); margin: 8px 16px 92px auto; margin-inline: 16px auto; }
 }
