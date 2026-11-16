@@ -275,6 +275,26 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLead);
   window.addEventListener("load", fitLead);
 
+  /* ---------- Feature cards: border light moves card to card ---------- */
+  const featureCards = $$(".feature");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (featureCards.length && !reduceMotion) {
+    const TRACE_MS = 2600; // one lap around a card, then move to the next
+    let current = 0, timer = null;
+    featureCards.forEach((c) => c.style.setProperty("--trace-time", TRACE_MS + "ms"));
+    const step = () => {
+      featureCards.forEach((c) => c.classList.remove("is-tracing"));
+      const card = featureCards[current];
+      void card.offsetWidth; // restart the animation on the same card
+      card.classList.add("is-tracing");
+      current = (current + 1) % featureCards.length; // after the last card, back to the first
+    };
+    const start = () => { if (!timer) { step(); timer = setInterval(step, TRACE_MS); } };
+    const stop = () => { clearInterval(timer); timer = null; featureCards.forEach((c) => c.classList.remove("is-tracing")); };
+    new IntersectionObserver((entries) => entries.forEach((e) => (e.isIntersecting ? start() : stop())), { threshold: 0.2 })
+      .observe($(".features-grid"));
+  }
+
   /* ---------- About video: pause for reduced motion ---------- */
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     $$(".about-video, .hero-bg").forEach((v) => { if (v.pause) { v.removeAttribute("autoplay"); v.pause(); } });

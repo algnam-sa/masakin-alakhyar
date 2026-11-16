@@ -136,7 +136,7 @@ h2 { font-size: var(--fs-title); }
 
 /* ---------- Features ---------- */
 .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-.feature { text-align: center; background: #fff; border-radius: var(--radius); padding: 28px 22px; border: 1px solid var(--line); transition: transform .3s, box-shadow .3s; }
+.feature { position: relative; isolation: isolate; text-align: center; background: #fff; border-radius: var(--radius); padding: 28px 22px; border: 1px solid var(--line); transition: transform .3s, box-shadow .5s; }
 .feature:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
 .feature-icon { width: 56px; height: 56px; border-radius: 16px; background: var(--clay); display: grid; place-items: center; margin: 0 auto 16px; }
 .feature-icon svg { width: 28px; height: 28px; fill: none; stroke: var(--ink-2); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
@@ -375,4 +375,34 @@ body.no-scroll { overflow: hidden; }
   .hero { flex-direction: column; justify-content: flex-end; align-items: stretch; }
   .hero-content { padding-bottom: 28px; }
   .marketer { position: relative; bottom: auto; left: auto; width: min(170px, calc(100% - 32px)); margin: 8px 16px 92px auto; margin-inline: 16px auto; }
+}
+
+/* ---------- Feature cards: light tracing the border, card to card ---------- */
+@property --trace {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.feature::before, .feature::after {
+  content: ""; position: absolute; inset: -2px; border-radius: calc(var(--radius) + 2px); padding: 3px;
+  background: conic-gradient(from var(--trace),
+    transparent 0deg 200deg,
+    rgba(165,134,90,.35) 240deg,
+    #c9a063 290deg,
+    #f39925 330deg,
+    #fff6e6 350deg,
+    transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0; pointer-events: none; z-index: 1;
+  transition: opacity .45s ease;
+}
+.feature::after { filter: blur(10px); z-index: -1; padding: 6px; inset: -4px; }
+.feature.is-tracing::before { opacity: 1; animation: traceBorder var(--trace-time, 2.6s) linear forwards; }
+.feature.is-tracing::after { opacity: .9; animation: traceBorder var(--trace-time, 2.6s) linear forwards; }
+.feature.is-tracing { box-shadow: 0 16px 36px -18px rgba(243,153,37,.45); border-color: transparent; }
+@keyframes traceBorder { from { --trace: 0deg; } to { --trace: 360deg; } }
+@media (prefers-reduced-motion: reduce) {
+  .feature::before, .feature::after { display: none; }
 }
