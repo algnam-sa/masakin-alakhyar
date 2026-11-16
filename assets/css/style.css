@@ -130,9 +130,10 @@ h2 { font-size: var(--fs-title); }
 .facts dt { color: var(--muted); font-size: 14px; }
 .facts dd { margin: 0; color: var(--ink); font-weight: 600; }
 .about-media { margin: 0; position: relative; }
-.about-media img { border-radius: var(--radius); box-shadow: var(--shadow); aspect-ratio: 4/5; object-fit: cover; width: 100%; cursor: zoom-in; }
+.about-media img, .about-media video { display: block; border-radius: var(--radius); box-shadow: var(--shadow); aspect-ratio: 4/5; object-fit: cover; width: 100%; max-width: 100%; background: var(--cream); }
+.about-media img { cursor: zoom-in; }
 .about-media::before { content: ""; position: absolute; inset: 24px -24px -24px 24px; border: 2px solid var(--sand); border-radius: var(--radius); z-index: -1; }
-.about-media figcaption { position: absolute; bottom: 16px; right: 16px; background: rgba(29,39,51,.8); color: #fff; padding: .3em 1em; border-radius: 999px; font-size: .85rem; }
+.about-media figcaption { position: absolute; bottom: 16px; right: 16px; background: rgba(31,74,66,.85); color: #fff; padding: .3em 1em; border-radius: 999px; font-size: .85rem; }
 
 /* ---------- Features ---------- */
 .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }

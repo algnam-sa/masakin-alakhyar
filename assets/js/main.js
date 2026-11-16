@@ -275,5 +275,9 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLead);
   window.addEventListener("load", fitLead);
 
+  /* ---------- About video: pause for reduced motion ---------- */
+  const aboutVideo = $(".about-video");
+  if (aboutVideo && window.matchMedia("(prefers-reduced-motion: reduce)").matches) { aboutVideo.removeAttribute("autoplay"); aboutVideo.pause(); }
+
   $("#year").textContent = new Date().getFullYear();
 })();
