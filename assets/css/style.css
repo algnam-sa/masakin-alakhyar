@@ -381,7 +381,7 @@ body.no-scroll { overflow: hidden; }
 .features-grid { position: relative; }
 .feature-trail { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; }
 .feature-trail path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.feature-trail .trail-track { stroke: rgba(165,134,90,.18); stroke-width: 1.5; }
-.feature-trail .trail-glow { stroke: #f39925; stroke-width: 7; opacity: .55; filter: blur(5px); }
-.feature-trail .trail-line { stroke: url(#trailGradient); stroke-width: 3; }
+.feature-trail .trail-track { display: none; }
+.feature-trail .trail-glow { stroke: #f39925; stroke-width: 3.5; opacity: .6; filter: blur(3px); }
+.feature-trail .trail-line { stroke: url(#trailGradient); stroke-width: 1.5; }
 @media (prefers-reduced-motion: reduce) { .feature-trail { display: none; } }

@@ -307,11 +307,11 @@
     const build = () => {
       anims.forEach((a) => a.cancel()); anims = [];
       svg.querySelectorAll("g").forEach((g) => g.remove());
-      const g0 = featGrid.getBoundingClientRect();
-      const boxes = featCards.map((el) => {
-        const r = el.getBoundingClientRect();
-        return { l: r.left - g0.left, r: r.right - g0.left, t: r.top - g0.top, b: r.bottom - g0.top };
-      });
+      // layout positions (offset*), not getBoundingClientRect: unaffected by the slide-in transform
+      const boxes = featCards.map((el) => ({
+        l: el.offsetLeft, r: el.offsetLeft + el.offsetWidth,
+        t: el.offsetTop, b: el.offsetTop + el.offsetHeight,
+      }));
       // group cards into rows (same top), keep DOM order = reading order (right to left)
       const rows = [];
       boxes.forEach((bx) => {
@@ -321,17 +321,18 @@
       if (rows[0].length < 2) return; // single column: no path between cards
       rows.forEach((row) => {
         const top = Math.min(...row.map((c) => c.t)), bot = Math.max(...row.map((c) => c.b));
-        // start on the outer (right) edge of the first card's top, then alternate: top of card 1, bottom of card 2, top of card 3...
+        // Follow the card edges: top of card 1, down its left edge, along the bottom of card 2,
+        // up its left edge, along the top of card 3, down its left edge, along the bottom of card 4.
         const pts = [[row[0].r, top]];
         let y = top;
         for (let i = 0; i < row.length - 1; i++) {
-          const gx = (row[i].l + row[i + 1].r) / 2; // middle of the gap between cards
-          pts.push([gx, y]);
+          pts.push([row[i].l, y]);
           y = y === top ? bot : top;
-          pts.push([gx, y]);
+          pts.push([row[i].l, y]);
         }
         pts.push([row[row.length - 1].l, y]);
-        const d = roundedPath(pts, 14);
+        const radius = parseFloat(getComputedStyle(featCards[0]).borderTopLeftRadius) || 18;
+        const d = roundedPath(pts, radius);
         const g = document.createElementNS(NS, "g");
         g.innerHTML = `<path class="trail-track" d="${d}"/><path class="trail-glow" d="${d}"/><path class="trail-line" d="${d}"/>`;
         svg.appendChild(g);
