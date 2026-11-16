@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Changa:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="assets/img/hero.webp">
+  <link rel="preload" as="image" href="assets/img/hero-poster.webp">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -42,10 +42,10 @@
 <main>
 <!-- ============ Hero ============ -->
 <section class="hero">
-  <picture>
-    <source media="(max-width: 700px)" srcset="assets/img/hero-sm.webp">
-    <img src="assets/img/hero.webp" alt="منظور خارجي لعمارة مساكن الأخيار السكنية" class="hero-bg" fetchpriority="high">
-  </picture>
+  <video class="hero-bg" poster="assets/img/hero-poster.webp" autoplay muted loop playsinline preload="auto" aria-label="جولة ليلية حول عمارة مساكن الأخيار">
+    <source src="assets/video/hero.mp4" type="video/mp4">
+    <source src="assets/video/hero.webm" type="video/webm">
+  </video>
   <div class="hero-overlay"></div>
   <div class="container hero-content">
     <span class="eyebrow">بريدة · حي النخيل</span>

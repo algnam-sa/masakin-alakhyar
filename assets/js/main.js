@@ -276,8 +276,9 @@
   window.addEventListener("load", fitLead);
 
   /* ---------- About video: pause for reduced motion ---------- */
-  const aboutVideo = $(".about-video");
-  if (aboutVideo && window.matchMedia("(prefers-reduced-motion: reduce)").matches) { aboutVideo.removeAttribute("autoplay"); aboutVideo.pause(); }
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    $$(".about-video, .hero-bg").forEach((v) => { if (v.pause) { v.removeAttribute("autoplay"); v.pause(); } });
+  }
 
   $("#year").textContent = new Date().getFullYear();
 })();
