@@ -275,24 +275,88 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLead);
   window.addEventListener("load", fitLead);
 
-  /* ---------- Feature cards: border light moves card to card ---------- */
-  const featureCards = $$(".feature");
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (featureCards.length && !reduceMotion) {
-    const TRACE_MS = 2600; // one lap around a card, then move to the next
-    let current = 0, timer = null;
-    featureCards.forEach((c) => c.style.setProperty("--trace-time", TRACE_MS + "ms"));
-    const step = () => {
-      featureCards.forEach((c) => c.classList.remove("is-tracing"));
-      const card = featureCards[current];
-      void card.offsetWidth; // restart the animation on the same card
-      card.classList.add("is-tracing");
-      current = (current + 1) % featureCards.length; // after the last card, back to the first
+  /* ---------- Feature cards: light runs a zigzag path along each row (both rows at once) ---------- */
+  const featGrid = $(".features-grid");
+  const featCards = $$(".feature", featGrid);
+  if (featGrid && featCards.length && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const NS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("class", "feature-trail");
+    svg.setAttribute("aria-hidden", "true");
+    svg.innerHTML = '<defs><linearGradient id="trailGradient" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#c9a063"/><stop offset="1" stop-color="#f39925"/></linearGradient></defs>';
+    featGrid.appendChild(svg);
+    const SPEED = 520;   // px per second
+    const DASH = 240;    // length of the moving light
+    let anims = [], visible = false;
+
+    // Rounded polyline through points (corner radius r)
+    const roundedPath = (pts, r) => {
+      let d = `M${pts[0][0]},${pts[0][1]}`;
+      for (let i = 1; i < pts.length - 1; i++) {
+        const [px, py] = pts[i - 1], [cx, cy] = pts[i], [nx, ny] = pts[i + 1];
+        const l1 = Math.hypot(cx - px, cy - py), l2 = Math.hypot(nx - cx, ny - cy);
+        const k = Math.min(r, l1 / 2, l2 / 2);
+        const ax = cx - ((cx - px) / l1) * k, ay = cy - ((cy - py) / l1) * k;
+        const bx = cx + ((nx - cx) / l2) * k, by = cy + ((ny - cy) / l2) * k;
+        d += ` L${ax},${ay} Q${cx},${cy} ${bx},${by}`;
+      }
+      const last = pts[pts.length - 1];
+      return d + ` L${last[0]},${last[1]}`;
     };
-    const start = () => { if (!timer) { step(); timer = setInterval(step, TRACE_MS); } };
-    const stop = () => { clearInterval(timer); timer = null; featureCards.forEach((c) => c.classList.remove("is-tracing")); };
-    new IntersectionObserver((entries) => entries.forEach((e) => (e.isIntersecting ? start() : stop())), { threshold: 0.2 })
-      .observe($(".features-grid"));
+
+    const build = () => {
+      anims.forEach((a) => a.cancel()); anims = [];
+      svg.querySelectorAll("g").forEach((g) => g.remove());
+      const g0 = featGrid.getBoundingClientRect();
+      const boxes = featCards.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { l: r.left - g0.left, r: r.right - g0.left, t: r.top - g0.top, b: r.bottom - g0.top };
+      });
+      // group cards into rows (same top), keep DOM order = reading order (right to left)
+      const rows = [];
+      boxes.forEach((bx) => {
+        const row = rows.find((rw) => Math.abs(rw[0].t - bx.t) < 4);
+        row ? row.push(bx) : rows.push([bx]);
+      });
+      if (rows[0].length < 2) return; // single column: no path between cards
+      rows.forEach((row) => {
+        const top = Math.min(...row.map((c) => c.t)), bot = Math.max(...row.map((c) => c.b));
+        // start on the outer (right) edge of the first card's top, then alternate: top of card 1, bottom of card 2, top of card 3...
+        const pts = [[row[0].r, top]];
+        let y = top;
+        for (let i = 0; i < row.length - 1; i++) {
+          const gx = (row[i].l + row[i + 1].r) / 2; // middle of the gap between cards
+          pts.push([gx, y]);
+          y = y === top ? bot : top;
+          pts.push([gx, y]);
+        }
+        pts.push([row[row.length - 1].l, y]);
+        const d = roundedPath(pts, 14);
+        const g = document.createElementNS(NS, "g");
+        g.innerHTML = `<path class="trail-track" d="${d}"/><path class="trail-glow" d="${d}"/><path class="trail-line" d="${d}"/>`;
+        svg.appendChild(g);
+        const len = g.querySelector(".trail-line").getTotalLength();
+        g.querySelectorAll(".trail-glow, .trail-line").forEach((path) => {
+          path.style.strokeDasharray = `${DASH} ${len + DASH}`;
+          const a = path.animate(
+            [{ strokeDashoffset: DASH }, { strokeDashoffset: -len }],
+            { duration: ((len + DASH) / SPEED) * 1000, iterations: Infinity, easing: "linear" }
+          );
+          if (!visible) a.pause();
+          anims.push(a);
+        });
+      });
+      // keep both rows in step: give every animation the longest duration
+      const maxDur = Math.max(...anims.map((a) => a.effect.getTiming().duration));
+      anims.forEach((a) => { a.effect.updateTiming({ duration: maxDur }); a.currentTime = 0; });
+    };
+    build();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(build);
+    let rt; new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(build, 150); }).observe(featGrid);
+    new IntersectionObserver((entries) => entries.forEach((e) => {
+      visible = e.isIntersecting;
+      anims.forEach((a) => (visible ? a.play() : a.pause()));
+    }), { threshold: 0.15 }).observe(featGrid);
   }
 
   /* ---------- About video: pause for reduced motion ---------- */
