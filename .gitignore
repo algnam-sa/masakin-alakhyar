@@ -1,0 +1,6 @@
+# Runtime data (database, local config, uploads) stays on the server
+/data/*.sqlite*
+/app/config.local.php
+/uploads/*
+!/uploads/.htaccess
+!/uploads/index.html

@@ -99,7 +99,7 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ---------- Stats ---------- */
 .stats-bar { background: var(--ink); color: #fff; position: relative; z-index: 2; }
-.stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); }
+.stats-grid { display: grid; grid-template-columns: repeat(var(--stats, 5), 1fr); }
 .stat { padding: 10px 12px; line-height: 1.5; text-align: center; border-inline-start: 1px solid rgba(255,255,255,.08); }
 .stat:first-child { border: 0; }
 .stat-num { display: block; font-size: var(--fs-title); font-weight: 700; color: var(--gold-light); line-height: 1.15; }
@@ -385,3 +385,7 @@ body.no-scroll { overflow: hidden; }
 .feature-trail .trail-glow { stroke: #f39925; stroke-width: 3.5; opacity: .6; filter: blur(3px); }
 .feature-trail .trail-line { stroke: url(#trailGradient); stroke-width: 1.5; }
 @media (prefers-reduced-motion: reduce) { .feature-trail { display: none; } }
+
+/* Spam trap field in the lead form: hidden from people, visible to naive bots */
+.hp-field { position: absolute !important; inset: 0 auto auto 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); opacity: 0; pointer-events: none; }
+.form-status:not(.ok):not(.err) { color: var(--muted); }

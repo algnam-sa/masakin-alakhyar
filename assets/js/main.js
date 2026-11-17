@@ -59,11 +59,10 @@
   /* ---------- Contact helpers ---------- */
   const waLink = (text) => CFG.phoneIntl ? `https://wa.me/${CFG.phoneIntl}?text=${encodeURIComponent(text)}` : "#contact";
   const phoneLink = $("#phoneLink");
-  phoneLink.textContent = CFG.phoneDisplay;
-  if (CFG.phoneIntl) phoneLink.href = "tel:+" + CFG.phoneIntl;
+  if (phoneLink && CFG.phoneIntl) phoneLink.href = "tel:+" + CFG.phoneIntl;
   if (CFG.phoneIntl) {
     const wa = $("#waFloat");
-    wa.href = waLink("السلام عليكم، أرغب بالاستفسار عن مشروع مساكن الأخيار");
+    wa.href = waLink(CFG.waMessage || "");
     wa.hidden = false;
   }
 
@@ -72,7 +71,7 @@
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${q}`;
   const mapFrame = $("#mapFrame");
   if (mapFrame) mapFrame.src = `https://maps.google.com/maps?q=${q}&z=17&output=embed`;
-  $("#mapLink").href = mapUrl;
+  if ($("#mapLink")) $("#mapLink").href = mapUrl;
 
   /* ---------- Models ---------- */
   const modelTabs = $("#modelTabs"), modelPanel = $("#modelPanel");
@@ -108,7 +107,7 @@
     $$(".tab", modelTabs).forEach((t) => { t.classList.toggle("is-active", t === b); t.setAttribute("aria-selected", t === b); });
     renderModel(b.dataset.model);
   });
-  renderModel(Object.keys(MODELS)[0]);
+  if (Object.keys(MODELS).length) renderModel(Object.keys(MODELS)[0]);
 
   /* ---------- Units grid ---------- */
   const building = $("#building");
@@ -156,27 +155,29 @@
 
   building.addEventListener("click", (e) => {
     const b = e.target.closest(".unit"); if (!b) return;
-    const u = UNITS.find((x) => x.no === +b.dataset.no), m = MODELS[u.model];
+    const u = UNITS.find((x) => x.no === +b.dataset.no);
+    const m = MODELS[u.model] || { name: u.model || "", image: "" };
     const rooms = ["صالة", "غرفة نوم رئيسية", "غرفة نوم", "مطبخ", "2 دورات مياه"];
     if (u.laundry) rooms.push("غرفة غسيل");
     if (u.terrace) rooms.push("تراس");
     if (u.roof) rooms.push("سطح خاص");
-    const msg = `السلام عليكم، أرغب بالاستفسار عن الشقة رقم ${u.no} (${m.name}) - ${u.floorName} في مشروع مساكن الأخيار`;
+    const msg = `السلام عليكم، أرغب بالاستفسار عن الشقة رقم ${u.no} (${m.name}) - ${u.floorName} في مشروع ${CFG.projectName || ""}`;
     body.innerHTML = `
-      <div class="unit-modal-img"><img src="${m.image}" alt="${m.name}"></div>
+      ${m.image ? `<div class="unit-modal-img"><img src="${m.image}" alt="${m.name}"></div>` : ""}
       <div class="unit-modal-body">
         <span class="status-pill"><i class="dot ${u.status}"></i>${STATUS[u.status]}</span>
         <h3 id="unitTitle">شقة رقم ${u.no}</h3>
         <p>${m.name} · ${u.floorName}</p>
         <div class="spec-grid">
           <div><span>مساحة الشقة</span><b>${fmt(u.area)} م²</b></div>
+          ${u.price ? `<div><span>السعر</span><b>${fmt(u.price, 0)} ${CFG.currency || ""}</b></div>` : ""}
           ${u.roof ? `<div><span>السطح الخاص</span><b>${fmt(u.roof)} م²</b></div>` : ""}
           <div><span>غرف النوم</span><b>2</b></div>
           <div><span>دورات المياه</span><b>2</b></div>
         </div>
         <p><b>المكونات:</b> ${rooms.join(" · ")}</p>
         <div class="unit-modal-actions">
-          ${u.status !== "sold" ? `<a class="btn btn-primary" ${CFG.phoneIntl ? `href="${waLink(msg)}" target="_blank" rel="noopener"` : `href="#contact" data-prefill="${u.no}" data-close`}>استفسر عن الشقة</a>` : ""}
+          ${u.status !== "sold" ? `<a class="btn btn-primary" ${CFG.phoneIntl ? `href="${waLink(msg)}" target="_blank" rel="noopener"` : `href="#contact" data-prefill="${u.no}" data-close`}>${CFG.inquiryLabel || "استفسر عن الشقة"}</a>` : ""}
           <button class="btn btn-outline" data-close>إغلاق</button>
         </div>
       </div>`;
@@ -206,16 +207,11 @@
   });
 
   /* ---------- Plans ---------- */
-  const PLANS = {
-    typical: ["assets/img/plan-typical.webp", "مسقط أفقي للدور المتكرر – 8 شقق بمساحة بناء 825.37 م²"],
-    ground: ["assets/img/plan-ground.webp", "مسقط أفقي للدور الأرضي – مواقف سيارات بمساحة 711.88 م²"],
-    annex: ["assets/img/plan-annex.webp", "مسقط أفقي للملحق العلوي – 4 شقق بمساحة بناء 367.60 م²"],
-  };
   const planImg = $("#planImg");
-  $("#planTabs").addEventListener("click", (e) => {
+  if ($("#planTabs") && planImg) $("#planTabs").addEventListener("click", (e) => {
     const b = e.target.closest(".tab"); if (!b) return;
     $$("#planTabs .tab").forEach((t) => { t.classList.toggle("is-active", t === b); t.setAttribute("aria-selected", t === b); });
-    const [src, cap] = PLANS[b.dataset.plan];
+    const src = b.dataset.src, cap = b.dataset.caption || "";
     planImg.style.opacity = 0;
     setTimeout(() => { planImg.src = src; planImg.dataset.lightbox = src; planImg.alt = cap; $("#planCaption").textContent = cap; planImg.style.opacity = 1; }, 200);
   });
@@ -232,27 +228,22 @@
     });
     if (!ok) { status.className = "form-status err"; status.textContent = "يرجى إدخال الاسم ورقم جوال صحيح (05xxxxxxxx)."; return; }
 
-    const d = Object.fromEntries(new FormData(form));
-    const lines = [
-      "طلب اهتمام - مشروع مساكن الأخيار",
-      `الاسم: ${d.name}`, `الجوال: ${d.phone}`,
-      d.model && `النموذج: ${d.model}`, d.unit && `رقم الشقة: ${d.unit}`,
-      d.message && `ملاحظات: ${d.message}`,
-    ].filter(Boolean).join("\n");
-
-    if (CFG.phoneIntl) {
-      window.open(waLink(lines), "_blank", "noopener");
-    } else if (CFG.email) {
-      location.href = `mailto:${CFG.email}?subject=${encodeURIComponent("طلب اهتمام - مساكن الأخيار")}&body=${encodeURIComponent(lines)}`;
-    } else {
-      status.className = "form-status err";
-      status.textContent = "لم يتم ربط وسيلة استقبال الطلبات بعد. يرجى التواصل هاتفيًا.";
-      console.warn("SITE_CONFIG.phoneIntl / email غير مُعدّة في assets/js/data.js");
-      return;
-    }
-    status.className = "form-status ok";
-    status.textContent = "شكرًا لك! تم استلام طلبك وسيتواصل معك فريق المبيعات قريبًا.";
-    form.reset();
+    const btn = $("button[type=submit]", form);
+    btn.disabled = true;
+    status.className = "form-status"; status.textContent = "جارٍ الإرسال…";
+    fetch(form.action, { method: "POST", body: new FormData(form), headers: { Accept: "application/json" } })
+      .then((r) => r.json().catch(() => ({})).then((data) => ({ ok: r.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok || !data.ok) throw new Error(data.error || "تعذّر إرسال الطلب. حاول مرة أخرى.");
+        status.className = "form-status ok";
+        status.textContent = CFG.success || "شكرًا لك! تم استلام طلبك.";
+        form.reset();
+      })
+      .catch((err) => {
+        status.className = "form-status err";
+        status.textContent = err.message || "تعذّر إرسال الطلب. تحقق من الاتصال وحاول مرة أخرى.";
+      })
+      .finally(() => { btn.disabled = false; });
   });
 
   /* ---------- Hero lead: two full lines under the title ---------- */
@@ -365,5 +356,5 @@
     $$(".about-video, .hero-bg").forEach((v) => { if (v.pause) { v.removeAttribute("autoplay"); v.pause(); } });
   }
 
-  $("#year").textContent = new Date().getFullYear();
+  if ($("#year")) $("#year").textContent = new Date().getFullYear();
 })();
