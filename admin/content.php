@@ -7,6 +7,11 @@ $user = require_login();
 $schema = content_schema();
 $key = $_GET['s'] ?? 'settings';
 if (!isset($schema[$key])) redirect('content.php?s=settings');
+if (!can('content.' . $key)) {
+    // Go to the first section this user may edit, or refuse
+    foreach (array_keys($schema) as $k) if (can('content.' . $k)) redirect('content.php?s=' . $k);
+    require_perm('content.' . $key);
+}
 $def = $schema[$key];
 
 $anchors = ['hero' => '#top', 'stats' => '#top', 'about' => '#about', 'features' => '#features', 'models' => '#models',

@@ -221,6 +221,22 @@
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") modal.hidden = true; });
   }
 
+  /* ---------- Permissions editor ---------- */
+  document.addEventListener("change", (e) => {
+    const t = e.target.closest("[data-admin-toggle]");
+    if (!t) return;
+    const groups = t.closest("form").querySelector("[data-perm-groups]");
+    if (groups) groups.classList.toggle("is-off", t.checked);
+  });
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-check-all]");
+    if (!b) return;
+    const boxes = [...b.closest(".perm-group").querySelectorAll('input[type="checkbox"]')];
+    const allOn = boxes.every((x) => x.checked);
+    boxes.forEach((x) => { x.checked = !allOn; });
+    b.textContent = allOn ? "تحديد الكل" : "إلغاء الكل";
+  });
+
   /* ---------- Copy media path ---------- */
   document.addEventListener("click", (e) => {
     const b = e.target.closest("[data-copy]");

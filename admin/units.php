@@ -1,6 +1,8 @@
 <?php
 require __DIR__ . '/_layout.php';
 $user = require_login();
+require_perm('units.view');
+$canEdit = can('units.edit');
 
 $pdo = db();
 $modelKeys = array_values(array_filter(array_map(fn($m) => (string)$m['key'], content('models')['items'] ?? []), 'strlen'));
@@ -14,6 +16,7 @@ $numOrNull = function ($v) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
+    require_perm('units.edit');
     $action = $_POST['action'] ?? '';
 
     if ($action === 'save') {
@@ -55,7 +58,7 @@ $rows = units();
 $filter = $_GET['status'] ?? '';
 page_start('الشقق', 'units', $user);
 ?>
-<p class="lead-text">عدّل حالة أي شقة أو سعرها ثم اضغط "حفظ التعديلات". التغييرات تظهر في الموقع مباشرة.</p>
+<p class="lead-text"><?= $canEdit ? 'عدّل حالة أي شقة أو سعرها ثم اضغط "حفظ التعديلات". التغييرات تظهر في الموقع مباشرة.' : 'صلاحيتك عرض الشقق فقط، بدون تعديل.' ?></p>
 
 <div class="toolbar">
   <div class="seg-filter" role="group" aria-label="تصفية حسب الحالة">
@@ -70,6 +73,7 @@ page_start('الشقق', 'units', $user);
 <form method="post" class="card table-card" id="unitsForm">
   <?= csrf_field() ?>
   <input type="hidden" name="action" value="save">
+  <fieldset class="plain"<?= $canEdit ? '' : ' disabled' ?>>
   <div class="table-wrap">
   <table class="table units-table">
     <thead>
@@ -104,21 +108,25 @@ page_start('الشقق', 'units', $user);
         <td class="center"><input type="checkbox" name="u[<?= $n ?>][laundry]" value="1" <?= $u['laundry'] ? 'checked' : '' ?> aria-label="غرفة غسيل للشقة <?= $n ?>"></td>
         <td class="center"><input type="checkbox" name="u[<?= $n ?>][terrace]" value="1" <?= $u['terrace'] ? 'checked' : '' ?> aria-label="تراس للشقة <?= $n ?>"></td>
         <td><input name="u[<?= $n ?>][notes]" value="<?= e($u['notes']) ?>" class="w-notes" placeholder="ملاحظة داخلية" aria-label="ملاحظة للشقة <?= $n ?>"></td>
-        <td><button type="button" class="icon-btn danger" data-delete-unit="<?= $n ?>" title="حذف الشقة <?= $n ?>" aria-label="حذف الشقة <?= $n ?>"><?= ico('trash') ?></button></td>
+        <td><?php if ($canEdit): ?><button type="button" class="icon-btn danger" data-delete-unit="<?= $n ?>" title="حذف الشقة <?= $n ?>" aria-label="حذف الشقة <?= $n ?>"><?= ico('trash') ?></button><?php endif; ?></td>
       </tr>
     <?php endforeach; ?>
     </tbody>
   </table>
   </div>
+  </fieldset>
+  <?php if ($canEdit): ?>
   <div class="sticky-save">
     <span class="muted" id="dirtyNote">لا توجد تعديلات غير محفوظة</span>
     <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
   </div>
+  <?php endif; ?>
 </form>
 <p class="muted small">الملاحظات داخلية ولا تظهر للزوار. السعر يظهر في الموقع فقط عند تفعيل "إظهار الأسعار" من الإعدادات العامة.</p>
 
 <form method="post" id="deleteUnitForm" hidden><?= csrf_field() ?><input type="hidden" name="action" value="delete"><input type="hidden" name="no"></form>
 
+<?php if ($canEdit): ?>
 <section class="card">
   <div class="card-head"><h2>إضافة شقة</h2></div>
   <form method="post" class="form-inline">
@@ -131,4 +139,5 @@ page_start('الشقق', 'units', $user);
     <button type="submit" class="btn btn-light"><?= ico('plus') ?>إضافة</button>
   </form>
 </section>
+<?php endif; ?>
 <?php page_end();

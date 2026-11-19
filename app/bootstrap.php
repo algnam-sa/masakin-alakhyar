@@ -86,6 +86,8 @@ function migrate(PDO $pdo): void
             username TEXT NOT NULL UNIQUE COLLATE NOCASE,
             name TEXT NOT NULL DEFAULT '',
             password_hash TEXT NOT NULL,
+            is_admin INTEGER NOT NULL DEFAULT 0,
+            perms TEXT NOT NULL DEFAULT '[]',
             created_at TEXT NOT NULL,
             last_login TEXT
         );
@@ -97,6 +99,15 @@ function migrate(PDO $pdo): void
         CREATE INDEX IF NOT EXISTS idx_attempts ON attempts(kind, ip, at);
         CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at);
     ");
+    // Upgrade older databases: per-user permissions. Existing users keep the full access they had.
+    $cols = $pdo->query('PRAGMA table_info(users)')->fetchAll(PDO::FETCH_COLUMN, 1);
+    if (!in_array('is_admin', $cols, true)) {
+        $pdo->exec("ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0");
+        $pdo->exec("UPDATE users SET is_admin = 1");
+    }
+    if (!in_array('perms', $cols, true)) {
+        $pdo->exec("ALTER TABLE users ADD COLUMN perms TEXT NOT NULL DEFAULT '[]'");
+    }
     // Seed default content and units the first time
     $has = (int)$pdo->query('SELECT COUNT(*) FROM content')->fetchColumn();
     if ($has === 0) {
@@ -249,9 +260,39 @@ function current_user(): ?array
         return null;
     }
     $_SESSION['seen'] = time();
-    $st = db()->prepare('SELECT id, username, name, last_login FROM users WHERE id = ?');
+    static $cached = null;
+    if ($cached && (int)$cached['id'] === (int)$_SESSION['uid']) return $cached;
+    $st = db()->prepare('SELECT id, username, name, last_login, is_admin, perms FROM users WHERE id = ?');
     $st->execute([$_SESSION['uid']]);
-    return $st->fetch() ?: null;
+    $u = $st->fetch();
+    if (!$u) return null;
+    $u['is_admin'] = (int)$u['is_admin'] === 1;
+    $u['perms'] = json_decode((string)$u['perms'], true) ?: [];
+    return $cached = $u;
+}
+
+/** Can the signed-in user do this? See app/permissions.php for the list. */
+function can(string $perm): bool
+{
+    require_once APP . '/permissions.php';
+    return user_can(current_user(), $perm);
+}
+
+/** Stop with a clear page when the signed-in user lacks a permission. */
+function require_perm(string $perm): void
+{
+    if (can($perm)) return;
+    http_response_code(403);
+    if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') || str_ends_with($_SERVER['SCRIPT_NAME'] ?? '', 'upload.php')) {
+        header('Content-Type: application/json; charset=utf-8');
+        exit(json_encode(['ok' => false, 'error' => 'ليست لديك صلاحية لهذا الإجراء.'], JSON_UNESCAPED_UNICODE));
+    }
+    exit('<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>غير مسموح</title>'
+       . '<body style="font-family:Tahoma,sans-serif;background:#f6f3ee;display:grid;place-items:center;min-height:100vh;margin:0">'
+       . '<div style="background:#fff;padding:32px;border-radius:16px;text-align:center;max-width:420px">'
+       . '<h1 style="color:#1f4a42;font-size:22px">ليست لديك صلاحية لهذه الصفحة</h1>'
+       . '<p style="color:#6e7c77">اطلب من مدير اللوحة إضافة الصلاحية لحسابك.</p>'
+       . '<a href="index.php" style="color:#2f6158;font-weight:bold">العودة للرئيسية</a></div></body></html>');
 }
 
 function users_count(): int

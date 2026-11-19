@@ -2,6 +2,7 @@
 /** Download a full database backup, or restore one. */
 require __DIR__ . '/_layout.php';
 $user = require_login();
+require_perm('backup');
 
 $dbPath = DATA_DIR . '/' . app_config()['db_file'];
 

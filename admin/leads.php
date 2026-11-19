@@ -1,13 +1,19 @@
 <?php
 require __DIR__ . '/_layout.php';
 $user = require_login();
+require_perm('leads.view');
 $pdo = db();
+$canEdit = can('leads.edit');
+$canDelete = can('leads.delete');
+$canExport = can('leads.export');
 
 /* ---------- Actions ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $id = (int)($_POST['id'] ?? 0);
     $action = $_POST['action'] ?? '';
+    if (in_array($action, ['update', 'status'], true)) require_perm('leads.edit');
+    if ($action === 'delete') require_perm('leads.delete');
     if ($action === 'update' && $id) {
         $status = isset(LEAD_STATUSES[$_POST['status'] ?? '']) ? $_POST['status'] : 'new';
         $pdo->prepare('UPDATE leads SET status = ?, notes = ?, updated_at = ? WHERE id = ?')
@@ -44,6 +50,7 @@ $sqlWhere = $where ? ' WHERE ' . implode(' AND ', $where) : '';
 
 /* ---------- Export (Excel-compatible CSV) ---------- */
 if (isset($_GET['export'])) {
+    require_perm('leads.export');
     $st = $pdo->prepare('SELECT * FROM leads' . $sqlWhere . ' ORDER BY id DESC');
     $st->execute($args);
     header('Content-Type: text/csv; charset=utf-8');
@@ -92,7 +99,9 @@ if (isset($_GET['id'])) {
       </section>
       <section class="card">
         <div class="card-head"><h2>المتابعة</h2></div>
+        <?php if (!$canEdit): ?><p class="muted small">صلاحيتك عرض الطلبات فقط، بدون تعديل المتابعة.</p><?php endif; ?>
         <form method="post" class="form">
+          <fieldset class="plain form"<?= $canEdit ? '' : ' disabled' ?>>
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="update">
           <input type="hidden" name="id" value="<?= (int)$lead['id'] ?>">
@@ -100,12 +109,15 @@ if (isset($_GET['id'])) {
             <select name="status"><?php foreach (LEAD_STATUSES as $k => $l): ?><option value="<?= $k ?>" <?= $lead['status'] === $k ? 'selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?></select>
           </label>
           <label class="fld"><span>ملاحظات المتابعة (داخلية)</span><textarea name="notes" rows="7"><?= e($lead['notes']) ?></textarea></label>
-          <button class="btn btn-primary" type="submit">حفظ</button>
+          <?php if ($canEdit): ?><button class="btn btn-primary" type="submit">حفظ</button><?php endif; ?>
+          </fieldset>
         </form>
+        <?php if ($canDelete): ?>
         <form method="post" class="danger-zone" data-confirm="حذف هذا الطلب نهائيًا؟">
           <?= csrf_field() ?><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int)$lead['id'] ?>">
           <button class="btn btn-danger-ghost" type="submit"><?= ico('trash') ?>حذف الطلب</button>
         </form>
+        <?php endif; ?>
       </section>
     </div>
     <?php
@@ -140,7 +152,7 @@ page_start('طلبات العملاء', 'leads', $user);
     <?php if ($status !== ''): ?><input type="hidden" name="status" value="<?= e($status) ?>"><?php endif; ?>
     <?= ico('search') ?><input type="search" name="q" value="<?= e($q) ?>" placeholder="ابحث بالاسم أو الجوال">
   </form>
-  <a class="btn btn-light" href="<?= e($qs(['export' => 1])) ?>"><?= ico('download') ?>تصدير Excel</a>
+  <?php if ($canExport): ?><a class="btn btn-light" href="<?= e($qs(['export' => 1])) ?>"><?= ico('download') ?>تصدير Excel</a><?php endif; ?>
 </div>
 
 <?php if (!$rows): ?>
@@ -163,7 +175,7 @@ page_start('طلبات العملاء', 'leads', $user);
           <form method="post" class="inline-status">
             <?= csrf_field() ?><input type="hidden" name="action" value="status"><input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
             <input type="hidden" name="back_status" value="<?= e($status) ?>"><input type="hidden" name="back_q" value="<?= e($q) ?>">
-            <select name="status" class="pill-select pill-<?= e($r['status']) ?>" data-autosubmit aria-label="حالة الطلب <?= (int)$r['id'] ?>">
+            <select name="status" class="pill-select pill-<?= e($r['status']) ?>" data-autosubmit<?= $canEdit ? '' : ' disabled' ?> aria-label="حالة الطلب <?= (int)$r['id'] ?>">
               <?php foreach (LEAD_STATUSES as $k => $l): ?><option value="<?= $k ?>" <?= $r['status'] === $k ? 'selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?>
             </select>
           </form>

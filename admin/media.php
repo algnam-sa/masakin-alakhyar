@@ -43,12 +43,16 @@ function media_usage(): array
 }
 
 if (isset($_GET['json'])) {
+    // The picker inside the content editor needs read access too
+    if (!can('media') && !can('content.any')) require_perm('media');
     header('Content-Type: application/json; charset=utf-8');
     $type = $_GET['type'] ?? '';
     $files = array_values(array_filter(media_files(), fn($f) => $type === '' || $f['type'] === $type));
     echo json_encode(['ok' => true, 'files' => $files], JSON_UNESCAPED_UNICODE);
     exit;
 }
+
+require_perm('media');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
     csrf_check();

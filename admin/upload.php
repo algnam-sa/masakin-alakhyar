@@ -14,6 +14,7 @@ function out(int $code, array $body): void
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') out(405, ['ok' => false, 'error' => 'طريقة غير مسموحة.']);
 if (!current_user()) out(401, ['ok' => false, 'error' => 'انتهت الجلسة. سجّل الدخول مرة أخرى.']);
 csrf_check();
+if (!can('media') && !can('content.any')) out(403, ['ok' => false, 'error' => 'ليست لديك صلاحية رفع الملفات.']);
 
 $f = $_FILES['file'] ?? null;
 if (!$f || !is_array($f) || ($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {

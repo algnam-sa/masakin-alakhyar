@@ -19,8 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($pass !== $pass2) {
         $error = 'كلمتا المرور غير متطابقتين.';
     } else {
-        db()->prepare('INSERT INTO users(username, name, password_hash, created_at) VALUES(?,?,?,?)')
-            ->execute([$old['username'], $old['name'], password_hash($pass, PASSWORD_DEFAULT), now()]);
+        // The first account is always a full administrator
+        db()->prepare('INSERT INTO users(username, name, password_hash, is_admin, perms, created_at) VALUES(?,?,?,1,?,?)')
+            ->execute([$old['username'], $old['name'], password_hash($pass, PASSWORD_DEFAULT), '[]', now()]);
         $st = db()->prepare('SELECT * FROM users WHERE username = ?');
         $st->execute([$old['username']]);
         login_user($st->fetch());

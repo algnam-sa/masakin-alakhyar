@@ -7,7 +7,7 @@ function admin_nav(): array
 {
     require_once APP . '/schema.php';
     $sections = [];
-    foreach (content_schema() as $k => $s) $sections[$k] = $s['title'];
+    foreach (content_schema() as $k => $s) if (can('content.' . $k)) $sections[$k] = $s['title'];
     return $sections;
 }
 
@@ -19,7 +19,7 @@ function new_leads_count(): int
 function page_start(string $title, string $active = '', ?array $user = null): void
 {
     $flash = flash();
-    $newLeads = $user ? new_leads_count() : 0;
+    $newLeads = $user && can('leads.view') ? new_leads_count() : 0;
     $site = content('settings');
     ?><!doctype html>
 <html lang="ar" dir="rtl">
@@ -44,16 +44,17 @@ function page_start(string $title, string $active = '', ?array $user = null): vo
   </a>
   <nav class="sb-nav">
     <a href="index.php" class="<?= $active === 'dashboard' ? 'active' : '' ?>"><?= ico('grid') ?>الرئيسية</a>
-    <a href="units.php" class="<?= $active === 'units' ? 'active' : '' ?>"><?= ico('building') ?>الشقق</a>
-    <a href="leads.php" class="<?= $active === 'leads' ? 'active' : '' ?>"><?= ico('inbox') ?>طلبات العملاء<?php if ($newLeads): ?><b class="badge"><?= $newLeads ?></b><?php endif; ?></a>
+    <?php if (can('units.view')): ?><a href="units.php" class="<?= $active === 'units' ? 'active' : '' ?>"><?= ico('building') ?>الشقق</a><?php endif; ?>
+    <?php if (can('leads.view')): ?><a href="leads.php" class="<?= $active === 'leads' ? 'active' : '' ?>"><?= ico('inbox') ?>طلبات العملاء<?php if ($newLeads): ?><b class="badge"><?= $newLeads ?></b><?php endif; ?></a><?php endif; ?>
+    <?php $nav = admin_nav(); if ($nav): ?>
     <span class="sb-label">محتوى الموقع</span>
-    <?php foreach (admin_nav() as $k => $t): ?>
+    <?php foreach ($nav as $k => $t): ?>
       <a href="content.php?s=<?= e($k) ?>" class="sub <?= $active === 'content:' . $k ? 'active' : '' ?>"><?= e($t) ?></a>
-    <?php endforeach; ?>
+    <?php endforeach; endif; ?>
     <span class="sb-label">النظام</span>
-    <a href="media.php" class="<?= $active === 'media' ? 'active' : '' ?>"><?= ico('image') ?>مكتبة الوسائط</a>
-    <a href="users.php" class="<?= $active === 'users' ? 'active' : '' ?>"><?= ico('users') ?>المستخدمون</a>
-    <a href="backup.php" class="<?= $active === 'backup' ? 'active' : '' ?>"><?= ico('save') ?>النسخ الاحتياطي</a>
+    <?php if (can('media')): ?><a href="media.php" class="<?= $active === 'media' ? 'active' : '' ?>"><?= ico('image') ?>مكتبة الوسائط</a><?php endif; ?>
+    <a href="users.php" class="<?= $active === 'users' ? 'active' : '' ?>"><?= ico('users') ?><?= can('admin') ? 'المستخدمون والصلاحيات' : 'حسابي' ?></a>
+    <?php if (can('backup')): ?><a href="backup.php" class="<?= $active === 'backup' ? 'active' : '' ?>"><?= ico('save') ?>النسخ الاحتياطي</a><?php endif; ?>
   </nav>
   <div class="sb-foot">
     <a href="../" target="_blank" rel="noopener" class="btn btn-light btn-block"><?= ico('external') ?>عرض الموقع</a>

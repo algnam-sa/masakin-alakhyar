@@ -324,3 +324,20 @@ tr.is-dirty { background: #fffaf0; }
 .table select.pill-closed { background: #ececec; color: #555; }
 td.nowrap { white-space: nowrap; }
 td.nowrap .icon-btn + .icon-btn { margin-inline-start: 6px; }
+
+/* Fieldset used only to lock a form for view-only users */
+fieldset.plain { border: 0; margin: 0; padding: 0; min-width: 0; }
+fieldset.plain[disabled] select, fieldset.plain[disabled] input { background: #f6f3ee; cursor: not-allowed; }
+/* Permissions editor */
+.perm-admin { background: var(--green-soft); border: 1px solid #cfe0da; border-radius: 12px; padding: 14px 16px; }
+.perm-admin .help { display: block; margin-top: 4px; }
+.perm-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.perm-group { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: #fcfbf9; min-width: 0; }
+.perm-group h4 { margin: 0 0 8px; font-size: 14.5px; color: var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.perm-group h4 button { font-size: 12.5px; }
+.perm-check { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; font-size: 14px; cursor: pointer; }
+.perm-check input { width: 17px; height: 17px; margin-top: 4px; accent-color: var(--green); flex: none; }
+.perm-groups.is-off { opacity: .45; pointer-events: none; }
+.perm-summary { display: flex; flex-wrap: wrap; gap: 4px; }
+.perm-summary .pill { font-weight: 500; }
+.pill-admin { background: var(--green); color: var(--orange); }
