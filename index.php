@@ -220,8 +220,24 @@ $siteName = $S['site_name'] ?? '';
         <?php foreach ($models as $k => $m): ?><button class="chip" data-model="<?= e($k) ?>"><?= e($k) ?></button>
         <?php endforeach; ?>
       </div>
-      <div class="legend" aria-label="دليل الألوان">
-        <?php foreach (UNIT_STATUSES as $k => $label): ?><span><i class="dot <?= $k ?>"></i><?= $label ?></span><?php endforeach; ?>
+      <?php
+        $statusCounts = array_count_values(array_column($jsUnits, 'status'));
+        $barLabels = ['sold' => 'مباعة', 'reserved' => 'محجوز', 'available' => 'متاح'];
+        $unitsWord = function (int $n): string {
+            if ($n === 1) return 'شقة واحدة';
+            if ($n === 2) return 'شقتان';
+            if ($n >= 3 && $n <= 10) return $n . ' شقق';
+            return $n . ' شقة';
+        };
+      ?>
+      <div class="sales-bar" role="img" aria-label="<?= e(implode('، ', array_map(fn($k) => $barLabels[$k] . ' ' . $unitsWord((int)($statusCounts[$k] ?? 0)), array_keys($barLabels)))) ?>">
+        <?php foreach ($barLabels as $k => $label): $n = (int)($statusCounts[$k] ?? 0); if (!$n) continue; ?>
+        <div class="sb-seg sb-<?= $k ?>" style="flex-grow: <?= $n ?>">
+          <span class="sb-label"><?= e($label) ?></span>
+          <span class="sb-track" aria-hidden="true"></span>
+          <span class="sb-count"><?= e($unitsWord($n)) ?></span>
+        </div>
+        <?php endforeach; ?>
       </div>
     </div>
 

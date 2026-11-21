@@ -7,6 +7,7 @@
   const UNITS = window.UNITS;
   const fmt = (n, d = 2) => Number(n).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
   const STATUS = { available: "متاحة", reserved: "محجوزة", sold: "مباعة" };
+  const STATUS_TILE = { reserved: "محجوز", sold: "مباعة" };
 
   /* ---------- Header ---------- */
   const header = $(".site-header");
@@ -124,7 +125,7 @@
       <div class="floor-label"><b>${list[0].floorName}</b><span>${avail} من ${list.length} متاحة</span></div>
       <div class="floor-units">${list.map((u) => `
         <button class="unit" data-no="${u.no}" data-model="${u.model}" data-status="${u.status}" aria-label="شقة ${u.no} - ${STATUS[u.status]}">
-          <b>${u.no}</b><small>${fmt(u.area)} م²</small><span class="unit-model">${u.model}</span>
+          ${u.status !== "available" ? `<span class="unit-status">${STATUS_TILE[u.status]}</span>` : ""}<b>${u.no}</b><small>${fmt(u.area)} م²</small><span class="unit-model">${u.model}</span>
         </button>`).join("")}
       </div>`;
     building.appendChild(row);
