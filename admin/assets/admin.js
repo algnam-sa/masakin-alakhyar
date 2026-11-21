@@ -137,8 +137,10 @@
     const prev = $(".media-preview", field);
     if (prev) {
       const isVideo = /\.(mp4|webm)$/i.test(path);
+      const isPdf = /\.pdf$/i.test(path);
       const src = /^https?:/i.test(path) ? path : "../" + path;
       prev.innerHTML = !path ? '<span class="media-empty">لا يوجد ملف</span>'
+        : isPdf ? `<a href="${src}" target="_blank" rel="noopener"><span class="pdf-thumb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg><b>PDF</b></span></a>`
         : isVideo ? `<video src="${src}" muted preload="metadata"></video>` : `<img src="${src}" alt="">`;
     }
     markDirty();
@@ -193,7 +195,7 @@
     modal.hidden = false;
     const grid = $("#mediaGrid");
     grid.innerHTML = '<p class="muted">جارٍ التحميل…</p>';
-    const type = field.dataset.media === "video" ? "video" : field.dataset.media === "image" ? "image" : "";
+    const type = ["video", "image", "pdf"].includes(field.dataset.media) ? field.dataset.media : "";
     fetch("media.php?json=1&type=" + type, { headers: { Accept: "application/json" } })
       .then((r) => r.json())
       .then((d) => {
@@ -204,7 +206,7 @@
           b.type = "button";
           b.dataset.path = f.path;
           const src = "../" + f.path;
-          b.innerHTML = `<span class="mg-thumb">${f.type === "video" ? `<video src="${src}" muted preload="metadata"></video>` : `<img src="${src}" alt="" loading="lazy">`}</span><span class="mg-name"></span>`;
+          b.innerHTML = `<span class="mg-thumb">${f.type === "pdf" ? '<span class="pdf-thumb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg><b>PDF</b></span>' : f.type === "video" ? `<video src="${src}" muted preload="metadata"></video>` : `<img src="${src}" alt="" loading="lazy">`}</span><span class="mg-name"></span>`;
           b.querySelector(".mg-name").textContent = f.path.split("/").pop();
           grid.appendChild(b);
         });

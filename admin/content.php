@@ -60,16 +60,19 @@ function render_field(array $f, $value, string $name): string
             return '<label class="fld">' . $label . '<select name="' . e($name) . '"' . $extra . '>' . $o . '</select>' . $help . '</label>';
         case 'image':
         case 'video':
+        case 'pdf':
             $isVideo = $f['type'] === 'video';
+            $isPdf = $f['type'] === 'pdf';
             $preview = $v === '' ? '<span class="media-empty">لا يوجد ملف</span>'
-                : ($isVideo ? '<video src="' . media_src($v) . '" muted preload="metadata"></video>' : '<img src="' . media_src($v) . '" alt="">');
-            return '<div class="fld media-field" data-media="' . ($isVideo ? 'video' : 'image') . '">' . $label
+                : ($isPdf ? '<a href="' . media_src($v) . '" target="_blank" rel="noopener"><span class="pdf-thumb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg><b>PDF</b></span></a>'
+                : ($isVideo ? '<video src="' . media_src($v) . '" muted preload="metadata"></video>' : '<img src="' . media_src($v) . '" alt="">'));
+            return '<div class="fld media-field" data-media="' . ($isPdf ? 'pdf' : ($isVideo ? 'video' : 'image')) . '">' . $label
                 . '<div class="media-row"><div class="media-preview">' . $preview . '</div><div class="media-ctrl">'
                 . '<input name="' . e($name) . '" value="' . e($v) . '" dir="ltr" class="media-path" placeholder="assets/... أو uploads/...">'
                 . '<div class="btn-row"><button type="button" class="btn btn-light btn-sm" data-upload>' . ico('upload') . 'رفع ملف</button>'
                 . '<button type="button" class="btn btn-light btn-sm" data-pick>اختيار من المكتبة</button>'
                 . '<button type="button" class="btn btn-ghost btn-sm" data-clear>إزالة</button></div>'
-                . '<input type="file" hidden accept="' . ($isVideo ? 'video/mp4,video/webm' : 'image/jpeg,image/png,image/webp,image/gif') . '">'
+                . '<input type="file" hidden accept="' . ($isPdf ? 'application/pdf,.pdf' : ($isVideo ? 'video/mp4,video/webm' : 'image/jpeg,image/png,image/webp,image/gif')) . '">'
                 . '<small class="upload-status" aria-live="polite"></small>' . $help . '</div></div></div>';
         case 'list':
             $items = is_array($value) ? $value : [];

@@ -29,11 +29,15 @@ if (!$f || !is_array($f) || ($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_O
 $allowed = [
     'image/jpeg' => ['jpg', 8], 'image/png' => ['png', 8], 'image/webp' => ['webp', 8], 'image/gif' => ['gif', 8],
     'video/mp4' => ['mp4', 120], 'video/webm' => ['webm', 120],
+    'application/pdf' => ['pdf', 0], // 0 = the largest size the hosting accepts
 ];
 $mime = (new finfo(FILEINFO_MIME_TYPE))->file($f['tmp_name']);
-if (!isset($allowed[$mime])) out(415, ['ok' => false, 'error' => 'نوع الملف غير مدعوم. المسموح: JPG, PNG, WEBP, GIF, MP4, WEBM.']);
+if (!isset($allowed[$mime])) out(415, ['ok' => false, 'error' => 'نوع الملف غير مدعوم. المسموح: JPG, PNG, WEBP, GIF, MP4, WEBM, PDF.']);
 [$ext, $maxMb] = $allowed[$mime];
-if ($f['size'] > $maxMb * 1024 * 1024) out(413, ['ok' => false, 'error' => "الحد الأقصى لهذا النوع {$maxMb} ميغابايت."]);
+if ($mime === 'application/pdf' && (string)file_get_contents($f['tmp_name'], false, null, 0, 5) !== '%PDF-') {
+    out(415, ['ok' => false, 'error' => 'الملف ليس PDF صالحًا.']);
+}
+if ($maxMb > 0 && $f['size'] > $maxMb * 1024 * 1024) out(413, ['ok' => false, 'error' => "الحد الأقصى لهذا النوع {$maxMb} ميغابايت."]);
 if (str_starts_with($mime, 'image/')) {
     $info = @getimagesize($f['tmp_name']);
     if ($info === false || $info[0] < 1 || $info[1] < 1 || $info[0] > 12000 || $info[1] > 12000) {

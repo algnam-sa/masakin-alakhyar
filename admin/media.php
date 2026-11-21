@@ -11,11 +11,11 @@ function media_files(): array
         $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS));
         foreach ($it as $file) {
             $ext = strtolower($file->getExtension());
-            if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif', 'mp4', 'webm'], true)) continue;
+            if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif', 'mp4', 'webm', 'pdf'], true)) continue;
             $rel = $urlBase . '/' . str_replace('\\', '/', substr($file->getPathname(), strlen($dir) + 1));
             $out[] = [
                 'path' => $rel,
-                'type' => in_array($ext, ['mp4', 'webm'], true) ? 'video' : 'image',
+                'type' => $ext === 'pdf' ? 'pdf' : (in_array($ext, ['mp4', 'webm'], true) ? 'video' : 'image'),
                 'size' => $file->getSize(),
                 'time' => $file->getMTime(),
                 'deletable' => $deletable,
@@ -35,7 +35,7 @@ function media_usage(): array
     $used = [];
     foreach (db()->query('SELECT key, value FROM content') as $r) {
         $v = str_replace('\\/', '/', $r['value']); // JSON may escape slashes
-        if (preg_match_all('~(?:uploads|assets)/[^"]+?\.(?:jpe?g|png|webp|gif|mp4|webm)~i', $v, $m)) {
+        if (preg_match_all('~(?:uploads|assets)/[^"]+?\.(?:jpe?g|png|webp|gif|mp4|webm|pdf)~i', $v, $m)) {
             foreach ($m[0] as $p) $used[$p] = true;
         }
     }
@@ -80,7 +80,7 @@ page_start('مكتبة الوسائط', 'media', $user);
   <p class="lead-text">كل الصور والفيديوهات المتاحة للموقع. ارفع ملفات جديدة من هنا أو من حقول الصور داخل أقسام المحتوى.</p>
   <div class="media-field" data-media="any" data-library-upload>
     <input type="hidden" class="media-path">
-    <input type="file" hidden accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm">
+    <input type="file" hidden accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,application/pdf,.pdf">
     <button type="button" class="btn btn-primary" data-upload><?= ico('upload') ?>رفع ملف</button>
     <small class="upload-status" aria-live="polite"></small>
   </div>
@@ -90,7 +90,8 @@ page_start('مكتبة الوسائط', 'media', $user);
 <?php foreach ($files as $f): $isUsed = isset($used[$f['path']]); ?>
   <figure class="media-card">
     <a href="../<?= url($f['path']) ?>" target="_blank" rel="noopener" class="thumb">
-      <?php if ($f['type'] === 'video'): ?><video src="../<?= url($f['path']) ?>" muted preload="metadata"></video><span class="tag">فيديو</span>
+      <?php if ($f['type'] === 'pdf'): ?><span class="pdf-thumb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg><b>PDF</b></span>
+      <?php elseif ($f['type'] === 'video'): ?><video src="../<?= url($f['path']) ?>" muted preload="metadata"></video><span class="tag">فيديو</span>
       <?php else: ?><img src="../<?= url($f['path']) ?>" alt="" loading="lazy"><?php endif; ?>
     </a>
     <figcaption>

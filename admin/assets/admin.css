@@ -341,3 +341,8 @@ fieldset.plain[disabled] select, fieldset.plain[disabled] input { background: #f
 .perm-summary { display: flex; flex-wrap: wrap; gap: 4px; }
 .perm-summary .pill { font-weight: 500; }
 .pill-admin { background: var(--green); color: var(--orange); }
+
+/* PDF thumbnails (brochure) */
+.pdf-thumb { display: grid; place-items: center; gap: 4px; color: #b9434a; padding: 10px; }
+.pdf-thumb svg { width: 40px; height: 40px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
+.pdf-thumb b { font-size: 12px; letter-spacing: .08em; }

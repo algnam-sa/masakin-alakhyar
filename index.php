@@ -136,13 +136,12 @@ $siteName = $S['site_name'] ?? '';
     </div>
     <div class="hero-actions">
       <?php if (!empty($H['btn1_label'])): ?><a href="<?= url($H['btn1_href'] ?? '#') ?>" class="btn btn-primary"><?= e($H['btn1_label']) ?></a><?php endif; ?>
-      <?php if (!empty($H['btn2_label'])): ?><a href="<?= url($H['btn2_href'] ?? '#') ?>" class="btn btn-ghost"><?= e($H['btn2_label']) ?></a><?php endif; ?>
+      <?php if (!empty($H['brochure_pdf'])): ?><a href="<?= url($H['brochure_pdf']) ?>" class="btn btn-ghost btn-brochure" download target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><?= e($H['brochure_label'] ?: 'تحميل البروشور') ?></a><?php endif; ?>
     </div>
   </div>
   <?php if (!empty($H['show_marketer']) && !empty($S['marketer_logo'])): ?>
   <aside class="marketer" aria-label="<?= e($S['marketer_label'] ?? '') ?>"><?= $marketer('marketer') ?></aside>
   <?php endif; ?>
-  <a href="#about" class="scroll-cue" aria-label="انتقل للأسفل"><span></span></a>
 </section>
 
 <!-- ============ Stats ============ -->

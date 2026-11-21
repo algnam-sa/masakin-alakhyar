@@ -9,6 +9,13 @@
   const STATUS = { available: "متاحة", reserved: "محجوزة", sold: "مباعة" };
   const STATUS_TILE = { reserved: "محجوز", sold: "مباعة" };
 
+  /* ---------- Hero height: leave room for the stats band on the first screen ---------- */
+  const statsBar = $(".stats-bar");
+  const setStatsH = () => { if (statsBar) document.documentElement.style.setProperty("--stats-h", statsBar.offsetHeight + "px"); };
+  setStatsH();
+  window.addEventListener("resize", setStatsH);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(setStatsH);
+
   /* ---------- Header ---------- */
   const header = $(".site-header");
   const onScroll = () => header.classList.toggle("is-solid", window.scrollY > 40);
