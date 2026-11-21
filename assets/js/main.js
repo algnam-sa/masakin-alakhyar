@@ -72,6 +72,8 @@
   const mapFrame = $("#mapFrame");
   if (mapFrame) mapFrame.src = `https://maps.google.com/maps?q=${q}&z=17&output=embed`;
   if ($("#mapLink")) $("#mapLink").href = mapUrl;
+  // Red pin on the map: open directions to the project
+  if ($("#mapPinLink")) $("#mapPinLink").href = "https://www.google.com/maps/dir/?api=1&destination=" + q;
 
   /* ---------- Models ---------- */
   const modelTabs = $("#modelTabs"), modelPanel = $("#modelPanel");
@@ -266,18 +268,20 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLead);
   window.addEventListener("load", fitLead);
 
-  /* ---------- Feature cards: light runs a zigzag path along each row (both rows at once) ---------- */
-  const featGrid = $(".features-grid");
-  const featCards = $$(".feature", featGrid);
-  if (featGrid && featCards.length && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  /* ---------- Edge light: runs a zigzag path along each row of cards (all rows at once) ----------
+     Used by the feature cards (gold) and the plot boundary cards (soft white). */
+  let trailId = 0;
+  const edgeTrail = (featGrid, featCards, opts) => {
+    if (!featGrid || !featCards.length || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const NS = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(NS, "svg");
-    svg.setAttribute("class", "feature-trail");
+    const gid = "trailGradient" + (++trailId);
+    svg.setAttribute("class", "feature-trail " + (opts.className || ""));
     svg.setAttribute("aria-hidden", "true");
-    svg.innerHTML = '<defs><linearGradient id="trailGradient" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#c9a063"/><stop offset="1" stop-color="#f39925"/></linearGradient></defs>';
+    svg.innerHTML = '<defs><linearGradient id="' + gid + '" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="' + opts.from + '"/><stop offset="1" stop-color="' + opts.to + '"/></linearGradient></defs>';
     featGrid.appendChild(svg);
-    const SPEED = 520;   // px per second
-    const DASH = 240;    // length of the moving light
+    const SPEED = opts.speed || 520;   // px per second
+    const DASH = opts.dash || 240;     // length of the moving light
     let anims = [], visible = false;
 
     // Rounded polyline through points (corner radius r)
@@ -325,7 +329,7 @@
         const radius = parseFloat(getComputedStyle(featCards[0]).borderTopLeftRadius) || 18;
         const d = roundedPath(pts, radius);
         const g = document.createElementNS(NS, "g");
-        g.innerHTML = `<path class="trail-track" d="${d}"/><path class="trail-glow" d="${d}"/><path class="trail-line" d="${d}"/>`;
+        g.innerHTML = `<path class="trail-track" d="${d}"/><path class="trail-glow" d="${d}"/><path class="trail-line" d="${d}" stroke="url(#${gid})"/>`;
         svg.appendChild(g);
         const len = g.querySelector(".trail-line").getTotalLength();
         g.querySelectorAll(".trail-glow, .trail-line").forEach((path) => {
@@ -349,7 +353,9 @@
       visible = e.isIntersecting;
       anims.forEach((a) => (visible ? a.play() : a.pause()));
     }), { threshold: 0.15 }).observe(featGrid);
-  }
+  };
+  edgeTrail($(".features-grid"), $$(".features-grid .feature"), { from: "#c9a063", to: "#f39925" });
+  edgeTrail($(".boundaries"), $$(".boundaries li"), { from: "rgba(255,255,255,.35)", to: "#ffffff", className: "trail-white", dash: 160, speed: 300 });
 
   /* ---------- About video: pause for reduced motion ---------- */
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {

@@ -64,10 +64,15 @@ $marketer = function (string $class, bool $lazy = false) use ($S) {
     return '<img src="' . url($S['marketer_logo']) . '" alt="' . e($S['marketer_name'] ?? '') . '"' . ($lazy ? ' loading="lazy"' : '') . '>'
          . '<span class="marketer-label">' . e($S['marketer_label'] ?? '') . '</span>';
 };
-$sectionHead = function (array $c, string $descKey = '') {
+$sectionHead = function (array $c, string $descKey = '', bool $fitRule = false) {
     $h = '<h2 class="section-title">' . e($c['title'] ?? '') . '</h2>';
-    if (!empty($c['sub'])) $h .= '<span class="section-sub">' . e($c['sub']) . '</span>';
-    $h .= '<span class="title-rule" aria-hidden="true"></span>';
+    // $fitRule: the gold line spans exactly the width of the subtitle
+    if ($fitRule && !empty($c['sub'])) {
+        $h .= '<span class="sub-fit"><span class="section-sub">' . e($c['sub']) . '</span><span class="title-rule" aria-hidden="true"></span></span>';
+    } else {
+        if (!empty($c['sub'])) $h .= '<span class="section-sub">' . e($c['sub']) . '</span>';
+        $h .= '<span class="title-rule" aria-hidden="true"></span>';
+    }
     if ($descKey && !empty($c[$descKey])) $h .= '<p>' . rich($c[$descKey]) . '</p>';
     return $h;
 };
@@ -267,7 +272,7 @@ $siteName = $S['site_name'] ?? '';
 <section class="section section-dark" id="location">
   <div class="container location-grid">
     <div class="location-text reveal">
-      <?= $sectionHead($LO) ?>
+      <?= $sectionHead($LO, '', true) ?>
       <?php if (!empty($LO['text'])): ?><p><?= rich($LO['text']) ?></p><?php endif; ?>
       <?php if (!empty($LO['boundaries'])): ?>
       <ul class="boundaries">
@@ -279,6 +284,7 @@ $siteName = $S['site_name'] ?? '';
     </div>
     <div class="map-wrap reveal">
       <iframe id="mapFrame" title="<?= e('خريطة موقع ' . $siteName) ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <a class="map-pin-link" id="mapPinLink" target="_blank" rel="noopener" title="الانتقال إلى موقع المشروع" aria-label="الانتقال إلى موقع المشروع في خرائط Google"></a>
       <?php if (!empty($LO['map_label'])): ?><span class="map-coords" dir="ltr"><?= e($LO['map_label']) ?></span><?php endif; ?>
     </div>
   </div>

@@ -383,7 +383,7 @@ body.no-scroll { overflow: hidden; }
 .feature-trail path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .feature-trail .trail-track { display: none; }
 .feature-trail .trail-glow { stroke: #f39925; stroke-width: 3.5; opacity: .6; filter: blur(3px); }
-.feature-trail .trail-line { stroke: url(#trailGradient); stroke-width: 1.5; }
+.feature-trail .trail-line { stroke-width: 1.5; }
 @media (prefers-reduced-motion: reduce) { .feature-trail { display: none; } }
 
 /* Spam trap field in the lead form: hidden from people, visible to naive bots */
@@ -394,3 +394,15 @@ body.no-scroll { overflow: hidden; }
 .site-footer .footer-desc { text-wrap: balance; max-width: 34em; }
 .site-footer li.is-bright { color: #fff; }
 .footer-bottom { color: #fff; }
+
+/* Location: smaller subtitle (30%) with the gold line spanning exactly its width */
+.sub-fit { display: inline-flex; flex-direction: column; align-items: stretch; max-width: 100%; }
+.sub-fit .title-rule { width: auto; align-self: stretch; }
+.location-text .section-sub { font-size: calc(var(--fs-sub) * .7); }
+/* Click target over the map's red pin (the pin sits at the map centre) */
+.map-pin-link { position: absolute; left: 50%; top: 50%; width: 46px; height: 58px; transform: translate(-50%, -90%); z-index: 2; border-radius: 50% 50% 45% 45%; cursor: pointer; }
+.map-pin-link:focus-visible { outline: 3px solid var(--clay); outline-offset: 2px; }
+/* Boundary cards: soft white edge light */
+.boundaries { position: relative; }
+.feature-trail.trail-white .trail-glow { stroke: #fff; stroke-width: 3; opacity: .35; filter: blur(3px); }
+.feature-trail.trail-white .trail-line { stroke-width: 1.2; opacity: .85; }
