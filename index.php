@@ -339,7 +339,7 @@ $siteName = $S['site_name'] ?? '';
   <div class="container footer-grid">
     <div>
       <?php if (!empty($FO['logo'])): ?><img class="footer-logo" src="<?= url($FO['logo']) ?>" alt="<?= e($S['logo_alt'] ?? $siteName) ?>" loading="lazy"><?php endif; ?>
-      <?php if (!empty($FO['description'])): ?><p><?= e($FO['description']) ?></p><?php endif; ?>
+      <?php if (!empty($FO['description'])): ?><p class="footer-desc"><?= e($FO['description']) ?></p><?php endif; ?>
     </div>
     <div>
       <h4><?= e($FO['links_title'] ?? '') ?></h4>
@@ -351,7 +351,7 @@ $siteName = $S['site_name'] ?? '';
     <div>
       <h4><?= e($FO['data_title'] ?? '') ?></h4>
       <ul>
-        <?php foreach (array_filter(explode("\n", (string)($FO['data_items'] ?? '')), 'strlen') as $li): ?><li><?= e($li) ?></li>
+        <?php foreach (array_filter(explode("\n", (string)($FO['data_items'] ?? '')), 'strlen') as $li): ?><li<?= str_contains($li, 'الحصري') ? ' class="is-bright"' : '' ?>><?= e($li) ?></li>
         <?php endforeach; ?>
       </ul>
     </div>

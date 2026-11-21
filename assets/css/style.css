@@ -389,3 +389,8 @@ body.no-scroll { overflow: hidden; }
 /* Spam trap field in the lead form: hidden from people, visible to naive bots */
 .hp-field { position: absolute !important; inset: 0 auto auto 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); opacity: 0; pointer-events: none; }
 .form-status:not(.ok):not(.err) { color: var(--muted); }
+
+/* Footer: balanced description lines, white copyright and marketer line */
+.site-footer .footer-desc { text-wrap: balance; max-width: 34em; }
+.site-footer li.is-bright { color: #fff; }
+.footer-bottom { color: #fff; }
